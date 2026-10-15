@@ -1,0 +1,37 @@
+# Python environments
+.venv/
+venv/
+env/
+
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Datasets and large files
+data/
+datasets/
+*.h5
+*.hdf5
+*.pt
+*.pth
+*.onnx
+*.safetensors
+
+# Generated outputs, predictions and checkpoints
+outputs/
+runs/
+wandb/
+mlruns/
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
