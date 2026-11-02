@@ -258,6 +258,47 @@ the prediction. Check it carefully for signs of spoilage."
     return explanation
 
 
+def translate_for_speech(
+    text: str,
+    language_code: str,
+    model_name: str,
+) -> str:
+    """Translate explanation into the target language script for Sarvam AI TTS."""
+    if language_code == "en-IN" or not text:
+        return text
+
+    api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+    if not api_key:
+        return text
+
+    lang_map = {"ta-IN": "Tamil", "hi-IN": "Hindi"}
+    lang_name = lang_map.get(language_code)
+    if not lang_name:
+        return text
+
+    prompt = (
+        f"Translate this short fruit quality explanation into natural spoken {lang_name}. "
+        f"Output ONLY the translated text in the native {lang_name} script, under 30 words, with no explanations, greetings, quotes, or notes.\n\n"
+        f"Text to translate:\n{text}"
+    )
+
+    try:
+        client = genai.Client(api_key=api_key)
+        response = client.models.generate_content(
+            model=model_name,
+            contents=prompt,
+            config={
+                "temperature": 0.2,
+                "max_output_tokens": 200,
+                "thinking_config": {"thinking_budget": 0},
+            },
+        )
+        translated = (response.text or "").strip().strip(" \t\n\"'")
+        return translated if translated else text
+    except Exception:
+        return text
+
+
 # ---------------------------------------------------------
 # 4. SARVAM: CONVERT THE SAME TEXT INTO SPEECH
 # ---------------------------------------------------------
@@ -393,8 +434,13 @@ def main() -> int:
         else:
             print(f"Generating Sarvam speech in {args.language}...")
 
+            spoken_text = translate_for_speech(
+                text=explanation,
+                language_code=args.language,
+                model_name=args.gemini_model,
+            )
             generate_speech(
-                explanation=explanation,
+                explanation=spoken_text,
                 language_code=args.language,
                 output_path=audio_path,
             )

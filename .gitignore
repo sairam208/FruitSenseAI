@@ -29,6 +29,7 @@ outputs/
 runs/
 wandb/
 mlruns/
+archive/
 
 # Editor and OS files
 .vscode/
